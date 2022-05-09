@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Optimising ‘First In Human’ trials via dynamic programming</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Lizzi Pitt" />
+    <link href="BSU_pres_files/remark-css/default.css" rel="stylesheet" />
+    <link href="BSU_pres_files/remark-css/default-fonts.css" rel="stylesheet" />
+    <script src="BSU_pres_files/kePrint/kePrint.js"></script>
+    <link href="BSU_pres_files/lightable/lightable.css" rel="stylesheet" />
+    <link rel="stylesheet" href="addons/default.css" type="text/css" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+    <link rel="stylesheet" href="addons/my_css2.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Optimising ‘First In Human’ trials via dynamic programming
+### Lizzi Pitt
+### 10/5/22
+
+---
+
+
+class: middle, center
+
+# What's the aim of your First in Human trial?
+
+
+
+
+
+
+
+---
+
+class: middle, inverse, center
+
+# What's the optimal design for your First in Human trial?
+
+---
+
+class: center, middle
+
+# About me
+
+.pull-left[
+&lt;img src="./img/SAMBa_Blue_Transparent.png" width="75%" /&gt;
+
+Supervised by 
+
+Professor Chris Jennison (University of Bath) 
+
+and Alun Bedding, PhD (Roche)
+
+]
+
+.pull-right[
+
+&lt;img src="./img/UCB_Logo_Tagline_ReflexBlue_RGB_Logo.jpg" width="75%" /&gt;
+]
+
+???
+
+Intro self
+
+disclaimer slide next?
+
+---
+
+## Clearly define the aims of your trial up front to find the optimal design
+
+.center[
+&lt;img src="./img/notepad_goals.png" width="75%" /&gt;
+]
+
+???
+
+Message I want you to take away
+
+---
+
+class: center, middle
+
+## In First in Human trials cohorts are dosed sequentially
+
+![](BSU_pres_files/figure-html/unnamed-chunk-4-1.png)&lt;!-- --&gt;
+
+???
+
+Take a step back and describe the trial
+
+The type of trial I'm thinking about looks something like this.
+
+The trial is conducted sequentially. 1 cohort is dosed at a time.
+
+In the simplest case, the aim is to estimate the maximum tolerated dose (MTD), the dose that corresponds to a particular rate of dose limiting events occurring (that's side effects that are considered too severe) 
+
+We have a fixed set of doses to choose the MTD from and to use during the trial
+  
+---
+
+class: center, middle
+
+## The dose for the next cohort must be chosen based on the response
+
+![](BSU_pres_files/figure-html/unnamed-chunk-5-1.png)&lt;!-- --&gt;
+
+???
+  
+When the response is observed, DLE or no DLE, from the cohort, the study team decide which dose to give the next cohort.
+
+---
+
+class: center, middle
+
+## The _dose escalation rule_ tells us which dose to choose
+
+
+
+
+![](BSU_pres_files/figure-html/unnamed-chunk-7-1.png)&lt;!-- --&gt;
+
+???
+  
+The dose escalation rule defines which dose to choose given the observed data.
+So that's either the dose to allocate to the next cohort or if we're at the end of the trial, the dose to recommend as the MTD (or output of the trial)
+
+The design consists of the dose escalation scheme and the final decision
+
+---
+
+class: middle, inverse, center
+
+# What's the optimal design for your First in Human trial?
+
+???
+
+Back to the key question, how do we optimally make these decisions about which dose to give when?
+
+---
+
+class: center, middle
+
+.pull-left[
+
+&lt;br&gt;
+
+&lt;br&gt;
+
+# It's not a one size fits all approach
+
+&lt;br&gt;
+]
+
+.pull-right[
+&lt;img src="./img/kid_suit.jpg" width="1164" /&gt;
+]
+
+???
+
+As is the same for many things in life, finding the best recipe or the best dose escalation scheme for a trial is not a one size fits all approach
+
+---
+
+class: center
+
+# Clearly define the aims of your trial up front
+
+![](BSU_pres_files/figure-html/unnamed-chunk-9-1.png)&lt;!-- --&gt;
+
+???
+
+To find the optimal dose escalation scheme for a specific trial, the first step is to clearly define the aims of the trial up front, and really think about all aspects
+
+Answering questions along these lines: 
+
+- What is the quantity to be estimated, that will be used to make a decision?
+
+- How much weight should be put on avoiding safety events during the trial?
+
+- Does a minimum number of subjects need to be allocated to a dose for it to be recommended as the MTD?
+
+- Is there a maximum increment for dose escalation?
+
+---
+
+## Clearly define the aims of the trial up front 
+
+### With an objective function
+
+.blockquoteghost[
+
+`$$\begin{aligned}
+\text{Loss} \ = \ &amp; \text{How far is the estimated MTD from the target} \ + \\ &amp; \text{Number of dose limiting events observed}
+\end{aligned}$$`
+
+]
+
+### And set of constraints
+
+???
+
+With the answers to these questions we can formalise the aims into an objective function and set of constraints
+
+---
+
+## Clearly define the aims of the trial up front 
+
+### With an objective function
+
+.blockquote[
+
+`$$\begin{aligned}
+\text{Loss} \ = \ &amp; \text{How far is the estimated MTD from the target} \ + \\ &amp; \text{Number of dose limiting events observed}
+\end{aligned}$$`
+
+]
+
+### And set of constraints
+
+--
+
+* Can dose levels be skipped?
+* Start at the lowest dose level?
+* Only recommended a dose that's been used in the study?
+
+???
+
+For example, the aim of the trial is to estimate the MTD, so we want to do that well, but we also want to make sure the subjects in the trial are exposed to limited risk, so we might have another term to reflect this, a penalty for events
+
+May also have constraints defined by regulatory or ethical constraints
+- limit on the dose increment, 
+- to start at the lowest level or 
+- to only recommend a dose as the MTD if it's been allocated to a certain number of cohorts during the study
+
+The constraints define the admissible dose sets - the doses available to be chosen - the dose that minimises the loss function from that set
+
+---
+
+## We can use dynamic programming to find the globally optimal dose escalation rule
+
+.left-column[
+Start at the final stage
+
+&lt;br&gt;
+
+&lt;br&gt;
+
+&lt;br&gt;
+]
+
+.right-column[
+![](BSU_pres_files/figure-html/unnamed-chunk-11-1.png)&lt;!-- --&gt;
+]
+
+---
+
+## We can use dynamic programming to find the globally optimal dose escalation rule
+
+.left-column[
+Start at the final stage
+
+&lt;br&gt;
+
+&lt;br&gt;
+
+For every state, calculate the optimal choice of dose and store it
+]
+.right-column[
+![](BSU_pres_files/figure-html/unnamed-chunk-12-1.png)&lt;!-- --&gt;
+]
+
+
+???
+
+For every possible data set, calculate the optimal choice of dose (to recommend as the MTD) and store it
+
+final stage picture  - fill in optimal choice of dose (grey out?)
+
+---
+
+### Continue backwards through the stages, calling in previously calculated values
+
+![](BSU_pres_files/figure-html/unnamed-chunk-13-1.png)&lt;!-- --&gt;
+
+???
+
+Consider a state at the penultimate stage, which dose should we allocate to the next cohort in order to proceed optimally given the data so far?
+
+---
+
+### Continue backwards through the stages, calling in previously calculated values
+
+![](BSU_pres_files/figure-html/unnamed-chunk-14-1.png)&lt;!-- --&gt;
+
+???
+
+weighted combination of the previously calculated values
+
+from the states the system could move to
+
+weights given by the probability of transitioning to each state
+
+(binomial given by the model depending on the dose)
+
+continue backwards - make an arrow and some numbers come up?
+
+---
+
+### Continue backwards through the stages, calling in previously calculated values
+
+.pull-left[
+
+&lt;br&gt;
+
+![](BSU_pres_files/figure-html/unnamed-chunk-15-1.png)&lt;!-- --&gt;
+]
+--
+
+.pull-right[
+
+&lt;br&gt;
+
+![](BSU_pres_files/figure-html/unnamed-chunk-17-1.png)&lt;!-- --&gt;
+]
+
+???
+
+If we choose dose 1, let's say we can move to these four places with some associated transition probabilities under the posterior given the current data. The conditional expected loss
+associated with choosing dose 1 at the orange state and proceeding optimally is a weighted combination of the loss associated with the optimal choice at the states the system could move to, which we've already calculated and stored.
+
+We consider a calculation of this sort for each of the possible choices of dose.
+
+(If we consider choosing dose 4, we can move to different states with some transition probabilities. Again we take a weighted average of the expected loss associated with the optimal choice of dose at the states we could move to. We consider a calculation of this sort for each of the possible choices of dose.)
+
+---
+
+### Continue backwards through the stages, calling in previously calculated values
+
+![](BSU_pres_files/figure-html/unnamed-chunk-18-1.png)&lt;!-- --&gt;
+
+???
+
+We then choose the dose which gives us the minimum expected loss for this state (the orange one), over the 6 possible choices and store it. 
+
+Once again, we do this for every possible state at this stage and can continue working backwards (until stage 0 of the trial where the decision is which dose to allocate to the first cohort).
+
+The result is the dose escalation scheme that is optimal with respect to the chosen loss function; the optimal decision at each stage of the trial for every possible state.
+
+
+---
+
+## The Bellman equations
+
+Define data set `\(X_j\)`, `\(0 &lt; j \leq J\)`, by
+`\(X_j = \{N_{1, j}, N_{2, j}, ..., N_{6, j}, V_{1, j}, V_{2, j}, ..., V_{6, j}\}\)`.
+
+--
+
+`$$\omega_{J, i}(x_J) = \int_0^{\infty}\pi_{A|X_J}(a;x_J)L(i, a) \ da$$`
+
+`$$\beta_J(x_J) = \min_i \omega_{J, i}(x_J)$$`
+
+--
+
+Let `\(\mathcal{B}_{x_{j, i}}\)` be the set of stage `\(j+1\)` states the system could transition to from `\(x_j\)` if allocated dose `\(i\)`.
+
+Let `\(q(x_{j+1}|x_j, i, a)\)` describe the probability of transitioning from `\(x_j\)` to `\(x_{j+1}\)` when allocated dose `\(i\)`, for a given `\(a\)`.
+
+--
+
+`$$\omega_{j, i}(x_j) = \int_0^{\infty}\pi_{A|X_j}(a;x_j) \sum_{x_{j+1} \in \mathcal{B}_{x_{j, i}}} q(x_{j+1}|x_j, i, a)\beta_{j+1}(x_{j+1}) \ da$$`
+
+`$$\beta_j(x_j) = \min_i\omega_{j, i}(x_j)$$`
+
+???
+
+These are what's known as the Bellman equations for this DP problem. Tell us how to find the optimal solution for a current state in terms of the optimal solution at future states which we've already calculated, because we're working backwards.
+
+We define a state of the system, a data set by `\(x_j\)`. This is defined as the doses allocated to the first `\(j\)` cohorts in the trial and their response, so whether the cohort experienced 0, 1, 2 or 3 DLEs. 
+
+We don't keep track of the order in which doses were allocated. This would make the state space larger, and we'll see later that it isn't necessary.
+
+So we're starting at the final stage of the trial, stage `\(J\)`, we have all the data and just need to decide which dose to recommend as the MTD.
+
+Define `\(\omega_{J, i}(x_J)\)` as the expected loss associated with recommending dose `\(i\)` as the MTD given we've observed data `\(x_J\)`
+
+Take the expected value of the loss function evaluated at dose `\(i\)` over the posterior density function for the model parameter `\(a\)` given the observed data `\(x_J\)`.
+
+We evaluate for every possible choice of dose, i in 1 to 6 and then choose the minimum.
+
+`\(\beta_J(x_J)\)` is the best we can do if starting from `\(x_J\)`, so it's the loss associated with making the optimal decision. We store this value as we'll need it later.
+
+At the penultimate stage, `\(j\)`, we need to consider which dose to allocate to cohort `\(j+1\)` but taking account of the fact that we've already worked out what the best thing to do at the next stage is.
+
+So we need to define the set of states the system can transition to at the next stage from the current state, if we choose dose `\(i\)` to give to the next cohort. We'll use this curly B notation to define this set.
+It contains data sets that add one more cohort to dose `\(i\)` and we could observe 0-3 events in response, so we'll add on 0-3 events to what we have so far at dose `\(i\)` `\(V_{i, j}\)`
+
+Which state we move to is defined by the transition probability
+which is binomial with success probability ...
+
+At stage `\(j\)`, the expected loss associated with starting at `\(x_j\)` and proceeding optimally thereafter if allocate dose `\(i\)` is a weighted average of the expected loss associated with the places we could move to at the next stage 
+
+(Mention penalty here??)
+
+optimal exp loss if we start at `\(x_j\)` we take the min over `\(i\)` is beta_j
+
+---
+
+class: middle, inverse, center
+
+# Dynamic programming can be used to produce optimal rules
+
+---
+
+### Describe the dose-response relationship with a model parameterised by a
+  
+.center[
+    &lt;img src="BSU_pres_files/figure-html/unnamed-chunk-19-1.png" width="100%" /&gt;
+    
+]
+
+???
+  
+Underpinning this, we describe the dose-response relationship with a one-parameter model.
+
+The aim of the trial is to learn about this parameter. Smaller value of theta corresponds to a more toxic drug
+
+We work in a Bayesian framework, so we put a prior on this parameter and make the decision about which dose to give the next cohort based on the posterior given all available data so far. (like the Continual Reassessment Method of O’Quigley et al)
+
+---
+
+### Given the observed data our beliefs about the model parameter a can be summarised with a gamma distribution
+
+.pull-left[
+![](BSU_pres_files/figure-html/unnamed-chunk-20-1.png)&lt;!-- --&gt;
+]
+
+.pull-right[
+
+
+
+![](BSU_pres_files/figure-html/unnamed-chunk-23-1.png)&lt;!-- --&gt;
+]
+
+
+???
+
+We find that we can approximate the posterior for the model parameter very well with a gamma distribution.
+
+- this figure shows examples of posterior density functions from two different data sets with their approximating gamma distributions (fitted by method of moments). 
+
+So we no longer need to think of the state as the set doses and outcomes, just two numbers, the parameters of the approximating gamma distribution
+
+rate lambda and shape k
+
+---
+
+### Different aims lead to different optimal choice of dose _to recommend as the MTD_
+
+![](BSU_pres_files/figure-html/unnamed-chunk-24-1.png)&lt;!-- --&gt;
+
+???
+
+We can use this to compare different schemes
+
+LHS just an estimation term in the loss function - only interested in correctly estimation the MTD
+
+The RHS is a rule optimised to respect the constraint that a dose can only be recommended as the MTD if it has been allocated during the trial - we can see that this changed the allocation in some cases. So if you want the rule to respect this constraint then you need to say so up front.
+
+---
+
+### Different aims lead to different optimal choice of dose to _allocate to the next cohort_
+
+
+
+
+
+![](BSU_pres_files/figure-html/unnamed-chunk-27-1.png)&lt;!-- --&gt;
+
+???
+
+Now we're stepping back to the penultimate stage
+
+LHS is again estimation only. On the RHS we have a penalty for events occurring during the trial. We can see this pushes the allocation to the lowest dose in lots of cases, particularly the region corresponding to more toxic data sets which is here (point).
+
+---
+
+class: inverse, middle, center
+
+# Different sets of aims lead to different optimal rules
+
+???
+
+So, different sets of aims lead to different dose escalation schemes so it's important to define all the aims up front and optimise with respect to that
+
+---
+
+## This framework can be used to provide a benchmark
+
+&lt;br&gt; 
+
+Design | **Expected Loss (Estimation term only)** | **Expected Loss (Estimation term and penalty for events)**
+--------------|--|--|
+3+3 |    |    
+CRM |    |    
+DP-A |    |    
+DP-B |     |   
+
+???
+
+The dynamic programming algorithm produces the optimal dose escalation scheme given an objective function and set of constraints - we can use the expected loss associated with that scheme as a benchmark to compare other designs to
+
+Simulate trials and evaluate the loss function for the trial data - simulating data according to the model I showed earlier, drawing the parameter from its prior for each rep
+
+Four different designs in the left column
+
+3+3 is an algorithmic/rule based design that increases to the next dose or gives the same dose again based on the number of events in a cohort of three. It makes a decision just based on the subjects on the current dose, so either the last 3 subjects, or possibly the last six if two cohorts were given the same dose. So it's not using all the data
+
+CRM - Continual Reassessment method - chooses the dose that minimises the posterior expected loss given the data available so far - different to DP as it doesn't consider what happens next in the trial - it's a myopic strategy - this leads to different dose escalation schemes
+
+DP-A is the design produced by the DP design given the loss function with just an estimation term
+
+DP-B is the design produced by the DP design given the loss function that includes a penalty for events that occur during the trial as well as the estimation term
+
+---
+
+ 
+
+## This framework can be used to provide a benchmark
+
+&lt;br&gt; 
+
+Design | **Expected Loss (Estimation term only)** | **Expected Loss (Estimation term and penalty for events)**
+--------------|--|--|
+3+3 | 0.183|    
+CRM | 0.154|    
+DP-A | **0.153**|    
+DP-B | 0.155 |   
+
+???
+
+When the aim is just to estimate the MTD well, 
+The value of this loss associated with the optimal design is 0.153 but we can see that the CRM peforms similarly - what I'm not showing you is that these two designs achieve this similar result through very different dose escalation schemes.
+DP-B has a slightly higher loss, which shows the trade-off introduced by optimising with respect to a loss function with multiple terms, we lose slightly in terms of estimation ability to consider the safety aim.
+
+3 + 3 is considerably worse at estimating the MTD on average
+
+---
+
+ 
+
+## This framework can be used to provide a benchmark
+
+&lt;br&gt; 
+
+Design | **Expected Loss (Estimation term only)** | **Expected Loss (Estimation term and penalty for events)**
+--------------|--|--|
+3+3 | 0.183|0.194
+CRM | 0.154| 0.197
+DP-A | **0.153**| 0.193
+DP-B | 0.155 |**0.185**
+
+
+???
+
+When we introduce the penalty for events into the loss function, the value of this loss associated with the optimal scheme is 0.185 and it's higher with the other designs. This means that more events occur on average when using the other designs.
+
+What I want you to take from this is that we can use the dynamic programming framework as a benchmark to which we can compare designs that may be simpler/more practical - if we decide it performs similarly to the optimal design then there's a good argument to use that design instead.
+
+---
+
+### This is an application of dynamic programming to a problem with a large state space
+
+&lt;!-- Should I show number for stage or for trial all (currently it's stage)? --&gt;
+
+.middle[
+&lt;table class="table" style="margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; Number of cohorts of 3 &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Number of states (2sf) &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 7 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 1.1 million &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 8 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 3.4 million &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 9 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 9.7 million &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 10 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 26 million &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;!-- ![](img_summer2020/tick.png) --&gt;
+]
+
+
+--
+
+&lt;img src="img/tick.png" style="position:absolute; width:5%; left:75%; top:37%;"&gt;
+&lt;img src="img/tick.png" style="position:absolute; width:5%; left:75%; top:42%;"&gt;
+&lt;img src="img/tick.png" style="position:absolute; width:5%; left:75%; top:47%;"&gt;
+
+--
+
+&lt;img src="img/cross.png" style="position:absolute; width:5%; left:70%; top:55%;"&gt;
+???
+
+This table shows the number of different states, which are data sets, counted in a certain way, for trials of different numbers of cohorts. 
+This shows how the size of the state space increases as the number of cohorts in the trial increases
+
+We have to do the calculations for every possible data set so this shows how much the work increases to compute the optimal dose escalation for a trial with one more cohort of three.
+
+This large state space means I had to overcome several computational challenges to get the code to run, or run fast enough to be useful.
+
+-&gt; devise an efficient numerical integration scheme, an efficient method for storing and ordering the data sets and storing the optimal decisions in a way that they were easy to retrieve at later stages of the dynamic programming algorithm
+
+So after addressing these challenges we can use dynamic programming to find an optimal dose escalation scheme for a trial with nine or fewer cohorts of three
+
+But I encounter memory problems when trying to extend to 10 cohorts of 3.
+
+To give an idea of the timings I think 9 cohorts takes just over 6 hours on Balena
+
+---
+
+class: inverse, center, middle
+
+## Can we reduce the work required to compute the optimal rule?
+
+???
+
+So can we reduce the amount of work required to compute the optimal rule, so that we can consider larger trials?
+ 
+---
+
+## Consider the space of posterior density functions
+
+.pull-left[
+![](BSU_pres_files/figure-html/unnamed-chunk-30-1.png)&lt;!-- --&gt;
+]
+
+
+.pull-right[
+
+&lt;img src="img/post_funs.gif" width="90%" /&gt;
+]
+
+
+???
+
+What really matters for decision making is not the data itself but the posterior density function for `\(a\)` given those data
+
+We turn this (LHS) into this (RHS)
+
+The plot on the right is showing that 5 different data sets result in very similar posterior density functions and therefore the same decision
+This suggests that we might be able to work with a sample of the data sets. 
+
+---
+
+class: inverse, center, middle
+
+# We need an approximation that operates on a *sample* of the state space
+
+???
+
+To reduce the amount of computation required we need an approximation that operates on a *sample* of the state space
+
+---
+
+### Previously, we stored the decision at every state
+
+.center[
+![](BSU_pres_files/figure-html/unnamed-chunk-33-1.png)&lt;!-- --&gt;
+]
+
+???
+
+But previously we stored the decision at every state, and used those values in calculations for states at earlier stages. 
+
+---
+
+### What's the posterior expected loss associated with the optimal decision at out-of-sample states?
+
+.center[
+![](BSU_pres_files/figure-html/unnamed-chunk-34-1.png)&lt;!-- --&gt;
+]
+
+
+???
+
+Consider the orange state again, and that the system can move to these four states (indicated by the coloured arrows) if we choose dose 1. Well to fill in the question mark, we need to know the expected loss associated with the optimal decision given that data.
+
+&lt;!-- Consider a stage somewhere in the middle of the process --&gt;
+
+&lt;!-- Suppose at stage N + 1, If we have a posterior with (lambda, k) we've stored beta(lambda, k), the optimal expected utility if I'm here and proceed optimally, "don't worry where this comes from" then look at state at stage N with its (lambda, k) -&gt; if we have 6 doses we have 6 different things omega_i ... If I choose dose d, under the posterior(lambda, k) where do I go next, then I can give beta at time N by taking min omega_i  --&gt;
+&lt;!-- -&gt; want to compute omega_i as a function of mean and var of gamma approx --&gt;
+
+---
+
+### Consider the posterior expected loss of choosing dose 4 at any final stage state
+
+
+
+
+.center[
+![](BSU_pres_files/figure-html/unnamed-chunk-37-1.png)&lt;!-- --&gt;
+]
+
+???
+
+As an example consider the posterior expected loss of choosing dose 4 at any final stage state
+
+On this plot, each point represents a data set.
+
+We want to model the relationship in this plot, that’s the posterior expected loss of choosing a particular dose, say dose 4, at any final stage state as a function of the mean and variance of the gamma distribution that approximates the posterior.
+
+with a model we can then predict the expected loss associated with chooing the dose at an out-of-sample states.
+
+(We do this for each dose, so with 6 doses we have 6 different models)
+
+&lt;!-- What's the expected utility if I choose dose 1 and proceed optimally given the observed data? --&gt;
+&lt;!-- Call this omega_1 and we shall model it as a function of the mean and variance of the gamma distribution approximating the posterior given by the data at each state --&gt;
+
+&lt;!-- This is a smooth function --&gt;
+
+&lt;!-- Do this using a generalised additive model --&gt;
+
+---
+
+class: inverse, center, middle
+
+# Use a *generalised additive model* to estimate the expected loss at out-of-sample states
+
+???
+
+To do this we can use a generalised additive model.
+
+Fairly easily in R using Simon Wood's mgcv package
+
+&lt;!-- Use the mgcv package (Simon Wood) --&gt;
+
+&lt;!-- Fits sums of smooth terms  --&gt;
+
+&lt;!-- GAM (generalised additive model) - weighted sums of spline basis functions --&gt;
+
+&lt;!-- flexible - don't have to specify the functional form upfront --&gt;
+
+&lt;!-- so it can find complicated structure --&gt;
+
+---
+
+### What's the posterior expected loss associated with the optimal decision at out-of-sample states?
+
+.center[
+![](BSU_pres_files/figure-html/unnamed-chunk-38-1.png)&lt;!-- --&gt;
+]
+
+???
+
+So we wanted to fill in this question mark..
+
+---
+
+### Use the fitted GAMs to fill in the gaps
+
+.pull-left[
+
+&lt;br&gt; 
+
+&lt;br&gt; 
+
+![](BSU_pres_files/figure-html/unnamed-chunk-39-1.png)&lt;!-- --&gt;
+]
+.pull-right[
+
+Predict the expected loss associated with each dose then choose the minimum.
+
+
+
+![](BSU_pres_files/figure-html/unnamed-chunk-41-1.png)&lt;!-- --&gt;
+]
+
+???
+
+we have six fitted models, one for the expected loss associated with choosing each of the 6 doses at the final stage. So we approximate the expected loss associated with choosing each dose using these fitted GAMs. This point (the black cross) represents the data set at this question mark. We want the loss associated with the optimal decision so that's the minimum over the 6, which on this plot is the most yellow, so dose 6.
+
+&lt;!-- Turn gaps into lambda - k then model the conditional expected utility given the data represented by lambda and k as a function of gamma mean and variance k/lambda and k/lambda^2 --&gt;
+
+---
+
+### Use the fitted GAMs to fill in the gaps
+
+.pull-left[
+
+&lt;br&gt;
+
+&lt;br&gt;
+
+![](BSU_pres_files/figure-html/unnamed-chunk-42-1.png)&lt;!-- --&gt;
+]
+
+--
+
+.pull-right[
+
+&lt;br&gt;
+
+&lt;br&gt;
+
+![](BSU_pres_files/figure-html/unnamed-chunk-43-1.png)&lt;!-- --&gt;
+]
+
+???
+
+This values fills in the gap.
+
+Again, we have a similar calculation for each possible choice
+
+(If we were choosing dose 4 at the orange state we would move to different places and need to fill in different gaps, which we would do in the same way using the fitted models - predict the value at each dose using the model for that dose, then choose the minimum.)
+
+---
+
+### Use the fitted GAMs to fill in the gaps
+
+.pull-left[
+
+&lt;br&gt;
+
+&lt;br&gt;
+
+![](BSU_pres_files/figure-html/unnamed-chunk-44-1.png)&lt;!-- --&gt;
+]
+
+.pull-right[
+
+&lt;br&gt;
+
+&lt;br&gt;
+
+![](BSU_pres_files/figure-html/unnamed-chunk-45-1.png)&lt;!-- --&gt;
+]
+
+???
+
+(We've used the GAMs to fill in the gaps, now we can take the weighted average to calculate the conditional expected loss associated with choosing each dose )
+
+---
+
+### Calculate and store the optimal decision at every state
+
+.center[
+![](BSU_pres_files/figure-html/unnamed-chunk-46-1.png)&lt;!-- --&gt;
+]
+
+???
+
+we take the minimum and store it, as well as the associated conditional expected loss of proceeding optimally from this state. We do this for every state in our sample so that we can fit models for this stage then continue the process backwards
+
+(With this approximate version of the algorithm the dose escalation scheme that is produced is a collection of GAMs, one for each dose at each stage of the trial. So if we were working forwards through a trial, we are at stage 3, say and need to know which dose to allocate to cohort 4 given the data we have observed, we would compute the mean and variance of the gamma approximation to the posterior given those data and use the stage 3 models to predict the expected loss of choosing each dose and choose the minimum as the optimal choice.)
+
+
+---
+
+## Performance is comparable
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; Rule &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Mean standard
+loss &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Mean toxicity
+penalty &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Mean loss
+with penalty &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr grouplength="2"&gt;&lt;td colspan="4" style="border-bottom: 1px solid;"&gt;&lt;strong&gt;J = 5&lt;/strong&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+   &lt;td style="text-align:left; padding-left:  2em;" indentlevel="1"&gt; Exact DP &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.166 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.018 &lt;/td&gt;
+   &lt;td style="text-align:right;font-weight: bold;"&gt; 0.184 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left; padding-left:  2em;" indentlevel="1"&gt; Approx DP &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.166 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.018 &lt;/td&gt;
+   &lt;td style="text-align:right;font-weight: bold;"&gt; 0.184 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr grouplength="2"&gt;&lt;td colspan="4" style="border-bottom: 1px solid;"&gt;&lt;strong&gt;J = 7&lt;/strong&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+   &lt;td style="text-align:left; padding-left:  2em;" indentlevel="1"&gt; Exact DP &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.159 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.024 &lt;/td&gt;
+   &lt;td style="text-align:right;font-weight: bold;"&gt; 0.183 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left; padding-left:  2em;" indentlevel="1"&gt; Approx DP &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.159 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.024 &lt;/td&gt;
+   &lt;td style="text-align:right;font-weight: bold;"&gt; 0.183 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr grouplength="2"&gt;&lt;td colspan="4" style="border-bottom: 1px solid;"&gt;&lt;strong&gt;J = 9&lt;/strong&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+   &lt;td style="text-align:left; padding-left:  2em;" indentlevel="1"&gt; Exact DP &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.155 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.030 &lt;/td&gt;
+   &lt;td style="text-align:right;font-weight: bold;"&gt; 0.185 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left; padding-left:  2em;" indentlevel="1"&gt; Approx DP &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.155 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.030 &lt;/td&gt;
+   &lt;td style="text-align:right;font-weight: bold;"&gt; 0.185 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+???
+
+Each set of 2 rows corresponds to a trial with different number of cohorts. The reason for looking at the results with increasingly larger trials is to look at whether approximation error grows with stage.
+
+We used the loss function with penalty - the right hand column - we see it's the same for both rules, so we have a good approximation. 
+
+Just to dive into these numbers a bit further, remember that we had two terms in the loss function - one for estimation and one for safety
+
+So for the estimation term, this mean standard loss column, we see the expected loss decreases as we add cohorts. This is because we're collecting more data so we have more info about the model parameter.
+
+But with more subjects we can also have more events, so the penalty for events increases - this is delta * number of events
+
+average of 4.5 (30%), then 6 (29%) then
+average of 7.5 (26%) events 
+
+
+Should also point out that we can't get to 0 as that would mean we had a dose level corresponding to prob of 0.3 for the given a - the best we can do is 0.13
+---
+
+## Performance is comparable
+
+
+
+.center[
+![](BSU_pres_files/figure-html/unnamed-chunk-49-1.png)&lt;!-- --&gt;
+]
+
+???
+
+We can also visualise this
+Very little difference - there is some
+
+---
+
+## Performance is comparable
+
+
+
+.center[
+![](BSU_pres_files/figure-html/unnamed-chunk-51-1.png)&lt;!-- --&gt;
+]
+
+???
+
+This stage takes into account the penalty
+
+These lines correspond to every one having an event, all but one, all but two etc. Really they're all too toxic over here so this trial would likely be stopped in practice
+
+---
+
+## The approximate dynamic programming algorithm is considerably cheaper to run
+
+&lt;!-- table showing exp util for diff stages? --&gt;
+
+&lt;!-- Comment on speed up --&gt;
+
+
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; Stage &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Number of states in sample &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Percentage of total possible states &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1734 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 79.5 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 4 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3759 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 29.9 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 5 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6457 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 11.1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 6 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9460 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4.2 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 7 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 12727 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.7 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 8 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 16068 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.7 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 9 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20052 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.3 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+???
+
+So, performance is similar, but what's the gain. Well we use considerably fewer states do achieve this rule - number of states per stage grows still, but at a much smaller rate, and the percentage of the full state space required decreases. 
+
+This can be run on my laptop 
+
+* need fewer points in `\((k, \lambda)\)` space compared to `\(x_j\)` space - NN method is more dependent on the samples in the space and exhaustive method is larger
+
+smooth function - use modelling in the optimisation algorithm to replace lots of work
+
+---
+
+class: inverse, center, middle
+
+# Performance of the approximately optimal rule is comparable to the fully optimal rule
+
+&lt;!-- table showing exp util for diff stages? --&gt;
+
+&lt;!-- Comment on speed up --&gt;
+
+???
+
+Through simulation we've found that performance of the optimal rule using the approximate dynamic programming algorithm is comparable to the optimal rule using the Full dynamic programming algorithm. 
+
+This has allowed us to extend to a trial with 10 cohorts and computing a rule takes minutes rather than hours.
+
+---
+
+class: inverse, center, middle
+
+# So we can consider larger trials and adding an efficacy endpoint
+
+???
+
+This means we could extend to a trial with 10 cohorts. What we really want is to consider a trial with an efficacy endpoint as well - extra parameter so a larger state space
+
+---
+
+class: middle, center
+
+## What are the aims for a study with .bright[safety] and .bright[efficacy] endpoints?
+
+![](BSU_pres_files/figure-html/unnamed-chunk-54-1.png)&lt;!-- --&gt;
+
+???
+
+Larger trials includes trials which have a binary efficacy endpoint as well as a binary safety endpoint
+
+Once again we need to define the aims up front. Perhaps less clear cut than for a trial with one endpoint. We need to answer questions like 
+
+- what type of trial will follow
+- what does the output represent (not necessarily the maximum tolerated dose any more)
+- how much emphasis should be put on avoiding safety events
+
+---
+
+### The safety-only methodology extends to First in Human trials with an efficacy endpoint as well
+
+&lt;br&gt;
+
+* Model the dose-toxicity and dose-efficacy relationships separately with one parameter models &lt;br&gt;
+
+* Assume toxicity and efficacy responses are independent &lt;br&gt; 
+
+--
+
+&lt;br&gt; 
+
+.blockquotepink[
+Key difference compared to the safety-only problem:
+We're working in a four parameter space `$$(k_T, \lambda_T, k_E, \lambda_E)$$`
+]
+
+???
+
+We model the dose-toxicity and dose-efficacy relationships separately, using the model we saw at the start, parameter `\(a\)` for tox and `\(b\)` for efficacy. We model the two responses as independent
+
+Key difference is that we have two posteriors so we convert each to the gamma approximation and have four parameters, two for each endpoint.
+
+??? 
+
+The methodology used for one endpoint extends fairly easily to two endpoints
+
+- we use seperate one-parameter models for dose-toxicity and dose-efficacy relationships (of the same form seen earlier)
+and assume tox and eff responses from an individual are independent
+
+- the key difference is that we're working in a four parameter space instead of two - two params to approx the posterior of the dose-toxicity model parameter and two to approximate the posterior of the dose-efficacy model parameter
+
+
+---
+
+# What's next?
+
+&lt;br&gt;
+
+* &lt;font size="+3"&gt;What are the aims of a trial with two endpoints?&lt;/font&gt;
+
+&lt;br&gt;
+
+* &lt;font size="+3"&gt;What is a suitable objective function?&lt;/font&gt;
+
+&lt;br&gt;
+
+* &lt;font size="+3"&gt;.bright[Case studies] and .bright[Conversation]&lt;/font&gt;
+
+???
+
+I've applied this with a couple of objective functions but I don't think they're particularly meaningful
+
+Future work
+I'd like to know how you would define an objective function for a First in Human trial with safety and efficacy endpoints?
+
+---
+
+class: inverse, center, middle
+
+# What's the aim of your First in Human trial?
+
+???
+
+
+---
+
+class: inverse, center, middle
+
+## Clearly define the aims of your trial up front to find the optimal design
+
+&lt;br&gt;
+
+.footnote[
+Slides created using the R package xaringan.
+]
+
+???
+  
+&lt;!-- (https://github.com/yihui/xaringan) --&gt;
+
+&lt;!-- Lizzi Pitt is supported by a scholarship from the EPSRC Centre for Doctoral Training in Statistical Applied Mathematics at Bath (SAMBa), under the project EP/L015684/1. --&gt;
+
+ So we've showed that if you define the aim of your first in human trial with an objective function we can use dynamic programming to give you the optimal dose escalation scheme with respect to that function.
+
+So if you say what you want to achieve from the trial we can work out how you should conduct the trial to be optimal in that setting.
+
+This can be used as a benchmark to compare how more well known or more practical designs would fare given your aims.
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create();
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
